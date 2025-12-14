@@ -30,9 +30,16 @@ const Header = () => {
             </a>
           </div>
           
-          <Button variant="hero" onClick={() => setWaitlistOpen(true)}>
-            Join Waitlist
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Link to="/admin">
+              <Button variant="outline" className="hidden md:inline-flex">
+                Admin Console
+              </Button>
+            </Link>
+            <Button variant="hero" onClick={() => setWaitlistOpen(true)}>
+              Join Waitlist
+            </Button>
+          </div>
         </div>
       </nav>
       

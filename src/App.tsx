@@ -7,24 +7,56 @@ import Index from "./pages/Index";
 import Privacy from "./pages/Privacy";
 import OptIn from "./pages/OptIn";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/admin/ProtectedRoute";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminChat from "./pages/admin/AdminChat";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSchedules from "./pages/admin/AdminSchedules";
+import AdminUpload from "./pages/admin/AdminUpload";
+import AdminIntegrations from "./pages/admin/AdminIntegrations";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/opt-in" element={<OptIn />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public website routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/opt-in" element={<OptIn />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              {/* <Route path="chat" element={<AdminChat />} /> */}
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="schedules" element={<AdminSchedules />} />
+              <Route path="upload" element={<AdminUpload />} />
+              <Route path="integrations" element={<AdminIntegrations />} />
+            </Route>
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
