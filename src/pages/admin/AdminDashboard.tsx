@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  MessageSquare, 
   Users, 
   Calendar,
   TrendingUp,
   Loader,
   ArrowRight
 } from 'lucide-react';
-import { adminApi, DEFAULT_PHONE_NUMBER } from '../../services/adminApi';
+import { adminApi } from '../../services/adminApi';
 import { useDbName } from '../../hooks/useDbName';
 
 const AdminDashboard = () => {
@@ -37,7 +36,7 @@ const AdminDashboard = () => {
       // Load users and schedules in parallel
       const [usersResponse, schedulesResponse] = await Promise.all([
         adminApi.getUsers(dbName).catch(() => ({ success: false, users: [] })),
-        adminApi.getSchedules(DEFAULT_PHONE_NUMBER, dbName).catch(() => ({ success: false, schedules: [] })),
+        adminApi.getSchedules(dbName).catch(() => ({ success: false, schedules: [] })),
       ]);
 
       setStats({
@@ -52,13 +51,6 @@ const AdminDashboard = () => {
   };
 
   const quickActions = [
-    // {
-    //   title: 'Start Chatting',
-    //   description: 'Ask questions about your business data',
-    //   icon: MessageSquare,
-    //   color: 'bg-blue-500',
-    //   link: '/admin/chat',
-    // },
     {
       title: 'Manage Users',
       description: 'Add or remove account users',

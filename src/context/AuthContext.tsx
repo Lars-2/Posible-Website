@@ -4,6 +4,7 @@ import axios from 'axios';
 interface User {
   email: string;
   db_name?: string;
+  twilio_number?: string;
   [key: string]: any;
 }
 
@@ -17,10 +18,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// In development, use relative URLs to leverage Vite proxy
-// In production, use the environment variable or default to same origin
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://posible.pythonanywhere.com');
+// Use environment variable or default to production backend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://posible.pythonanywhere.com';
 
 // Create a dedicated axios instance for auth API calls with credentials enabled
 const authClient = axios.create({

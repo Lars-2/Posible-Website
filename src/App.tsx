@@ -12,7 +12,6 @@ import ProtectedRoute from "./components/admin/ProtectedRoute";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminChat from "./pages/admin/AdminChat";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminSchedules from "./pages/admin/AdminSchedules";
 import AdminUpload from "./pages/admin/AdminUpload";
@@ -44,7 +43,6 @@ const App = () => (
               }
             >
               <Route index element={<AdminDashboard />} />
-              {/* <Route path="chat" element={<AdminChat />} /> */}
               <Route path="users" element={<AdminUsers />} />
               <Route path="schedules" element={<AdminSchedules />} />
               <Route path="upload" element={<AdminUpload />} />

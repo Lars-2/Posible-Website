@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// In development, use relative URLs to leverage Vite proxy
-// In production, use the environment variable or default to same origin
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.DEV ? '' : 'https://posible.pythonanywhere.com');
+// Use environment variable or default to production backend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://posible.pythonanywhere.com';
 
 // Create a dedicated axios instance for admin API calls with credentials enabled
 const apiClient = axios.create({
@@ -13,6 +11,9 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Default Twilio number for sending messages
+const DEFAULT_TWILIO_NUMBER = '+18442866647';
 
 export const adminApi = {
   // Users
@@ -32,15 +33,15 @@ export const adminApi = {
   },
 
   // Schedules
-  getSchedules: async (phoneNumber: string, dbName: string) => {
-    const response = await apiClient.get(`/api/schedules/${dbName}/${phoneNumber}`);
+  getSchedules: async (dbName: string) => {
+    const response = await apiClient.get(`/api/schedules/${dbName}`);
     return response.data;
   },
 
-  createSchedule: async (scheduleData: any, dbName: string) => {
+  createSchedule: async (scheduleData: any, dbName: string, twilioNumber: string) => {
     const response = await apiClient.post(`/api/schedules/${dbName}`, {
       ...scheduleData,
-      twilio_number: scheduleData.twilio_number || DEFAULT_TWILIO_NUMBER,
+      twilio_number: scheduleData.twilio_number || twilioNumber,
     });
     return response.data;
   },
@@ -50,24 +51,8 @@ export const adminApi = {
     return response.data;
   },
 
-  deleteSchedule: async (scheduleId: number, phoneNumber: string, dbName: string) => {
-    const response = await apiClient.delete(`/api/schedules/${dbName}/${scheduleId}`, {
-      data: { to_number: phoneNumber }
-    });
-    return response.data;
-  },
-
-  // Chat
-  sendMessage: async (query: string, phoneNumber: string, dbName: string) => {
-    const response = await apiClient.post(`/api/chat/${dbName}`, {
-      query,
-      from_number: phoneNumber,
-    });
-    return response.data;
-  },
-
-  getConversationHistory: async (phoneNumber: string, dbName: string) => {
-    const response = await apiClient.get(`/api/conversation-history/${dbName}/${phoneNumber}`);
+  deleteSchedule: async (scheduleId: number, dbName: string) => {
+    const response = await apiClient.delete(`/api/schedules/${dbName}/${scheduleId}`);
     return response.data;
   },
 
@@ -116,4 +101,3 @@ export const adminApi = {
     return response.data;
   },
 };
-

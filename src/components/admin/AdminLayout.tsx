@@ -1,14 +1,12 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, 
-  MessageSquare, 
   Users, 
   Calendar,
   Plug,
   Menu,
   X,
-  LogOut,
-  Upload
+  LogOut
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
@@ -26,10 +24,8 @@ const AdminLayout = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Home },
-    // { name: 'Chat', href: '/admin/chat', icon: MessageSquare },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Schedules', href: '/admin/schedules', icon: Calendar },
-    { name: 'Upload', href: '/admin/upload', icon: Upload },
     { name: 'Integrations', href: '/admin/integrations', icon: Plug },
   ];
 
@@ -97,7 +93,13 @@ const AdminLayout = () => {
           <div className="px-3 py-4 border-t border-gray-200 space-y-3">
             <div className="px-3">
               <p className="text-xs font-medium text-gray-700 mb-1">{user?.email}</p>
-              <p className="text-xs text-gray-500">Admin Console</p>
+              <br />
+              {user?.twilio_number && (
+                <>
+                  <p className="text-xs text-gray-500 mb-0.5">Assigned Chat Number:</p>
+                  <p className="text-xs text-gray-600 mb-1">{user.twilio_number}</p>
+                </>
+              )}
             </div>
             <Link
               to="/"
@@ -153,6 +155,12 @@ const AdminLayout = () => {
               <div className="px-3 py-4 border-t border-gray-200 space-y-3">
                 <div className="px-3">
                   <p className="text-xs font-medium text-gray-700 mb-1">{user?.email}</p>
+                  {user?.twilio_number && (
+                    <>
+                      <p className="text-xs text-gray-500 mb-0.5">Assigned Chat Number:</p>
+                      <p className="text-xs text-gray-600 mb-1">{user.twilio_number}</p>
+                    </>
+                  )}
                   <p className="text-xs text-gray-500">Admin Console</p>
                 </div>
                 <Link

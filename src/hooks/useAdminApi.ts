@@ -2,12 +2,13 @@ import { useAuth } from '../context/AuthContext';
 import { adminApi } from '../services/adminApi';
 
 /**
- * Custom hook that provides API methods with the authenticated user's db_name
+ * Custom hook that provides API methods with the authenticated user's db_name and twilio_number
  * Note: All methods will throw an error if db_name is not available (user not authenticated)
  */
 export const useAdminApi = () => {
   const { user } = useAuth();
   const dbName = user?.db_name;
+  const twilioNumber = user?.twilio_number;
 
   // Helper to ensure dbName is available
   const ensureDbName = (): string => {
@@ -17,6 +18,14 @@ export const useAdminApi = () => {
     return dbName;
   };
 
+  // Helper to ensure twilioNumber is available
+  const ensureTwilioNumber = (): string => {
+    if (!twilioNumber) {
+      throw new Error('Twilio number not available. User may not be authenticated.');
+    }
+    return twilioNumber;
+  };
+
   return {
     // Users
     getUsers: () => adminApi.getUsers(ensureDbName()),
@@ -24,14 +33,10 @@ export const useAdminApi = () => {
     deleteUser: (phoneNumber: string) => adminApi.deleteUser(phoneNumber, ensureDbName()),
 
     // Schedules
-    getSchedules: (phoneNumber: string) => adminApi.getSchedules(phoneNumber, ensureDbName()),
-    createSchedule: (scheduleData: any) => adminApi.createSchedule(scheduleData, ensureDbName()),
+    getSchedules: () => adminApi.getSchedules(ensureDbName()),
+    createSchedule: (scheduleData: any) => adminApi.createSchedule(scheduleData, ensureDbName(), ensureTwilioNumber()),
     editSchedule: (scheduleId: number, scheduleData: any) => adminApi.editSchedule(scheduleId, scheduleData, ensureDbName()),
-    deleteSchedule: (scheduleId: number, phoneNumber: string) => adminApi.deleteSchedule(scheduleId, phoneNumber, ensureDbName()),
-
-    // Chat
-    sendMessage: (query: string, phoneNumber: string) => adminApi.sendMessage(query, phoneNumber, ensureDbName()),
-    getConversationHistory: (phoneNumber: string) => adminApi.getConversationHistory(phoneNumber, ensureDbName()),
+    deleteSchedule: (scheduleId: number) => adminApi.deleteSchedule(scheduleId, ensureDbName()),
 
     // CSV Upload
     uploadCSV: (file: File, primaryKey: string | null) => adminApi.uploadCSV(file, primaryKey, ensureDbName()),
