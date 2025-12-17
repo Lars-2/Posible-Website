@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, Trash2, Loader, Users as UsersIcon, Shield } from 'lucide-react';
 import { adminApi } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 interface User {
   name: string;
@@ -9,6 +10,7 @@ interface User {
 }
 
 const AdminUsers = () => {
+  const dbName = useDbName();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,14 +23,22 @@ const AdminUsers = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    loadUsers();
-  }, []);
+    if (dbName) {
+      loadUsers();
+    }
+  }, [dbName]);
 
   const loadUsers = async () => {
+    if (!dbName) {
+      setError('Database name not available');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError('');
-      const response = await adminApi.getUsers();
+      const response = await adminApi.getUsers(dbName);
       
       if (response.success) {
         setUsers(response.users);
@@ -51,10 +61,15 @@ const AdminUsers = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError('');
-      const response = await adminApi.createUser(newUser);
+      const response = await adminApi.createUser(newUser, dbName);
       
       if (response.success) {
         setShowAddModal(false);
@@ -76,9 +91,14 @@ const AdminUsers = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setError('');
-      const response = await adminApi.deleteUser(phoneNumber);
+      const response = await adminApi.deleteUser(phoneNumber, dbName);
       
       if (response.success) {
         loadUsers();

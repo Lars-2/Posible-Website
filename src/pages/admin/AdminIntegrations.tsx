@@ -9,6 +9,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { adminApi } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 interface Integration {
   provider: string;
@@ -20,6 +21,7 @@ interface Integration {
 }
 
 const AdminIntegrations = () => {
+  const dbName = useDbName();
   const [integrations, setIntegrations] = useState<Integration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,14 +32,22 @@ const AdminIntegrations = () => {
   const [isSavingToast, setIsSavingToast] = useState(false);
 
   useEffect(() => {
-    loadIntegrations();
-  }, []);
+    if (dbName) {
+      loadIntegrations();
+    }
+  }, [dbName]);
 
   const loadIntegrations = async () => {
+    if (!dbName) {
+      setError('Database name not available');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError('');
-      const response = await adminApi.getIntegrations();
+      const response = await adminApi.getIntegrations(dbName);
       
       if (response.success) {
         setIntegrations(response.integrations);
@@ -59,11 +69,16 @@ const AdminIntegrations = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setConnecting(provider);
       setError('');
       
-      const response = await adminApi.connectIntegration(provider);
+      const response = await adminApi.connectIntegration(provider, dbName);
       
       if (response.success && response.auth_url) {
         // Open OAuth flow in new window
@@ -105,11 +120,16 @@ const AdminIntegrations = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setIsSavingToast(true);
       setError('');
       
-      const response = await adminApi.saveToastApiKey(toastApiKey, toastRestaurantGuid || null);
+      const response = await adminApi.saveToastApiKey(toastApiKey, toastRestaurantGuid || null, dbName);
       
       if (response.success) {
         setShowToastModal(false);
@@ -132,9 +152,14 @@ const AdminIntegrations = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setError('');
-      const response = await adminApi.disconnectIntegration(provider);
+      const response = await adminApi.disconnectIntegration(provider, dbName);
       
       if (response.success) {
         loadIntegrations();
@@ -161,7 +186,7 @@ const AdminIntegrations = () => {
     const colors: Record<string, string> = {
       square: 'from-blue-500 to-blue-600',
       clover: 'from-green-500 to-green-600',
-      toast: 'from-orange-500 to-orange-600',
+      toast: 'from-gray-500 to-gray-600',
     };
     return colors[provider] || 'from-gray-500 to-gray-600';
   };
@@ -287,7 +312,7 @@ const AdminIntegrations = () => {
 
                   {/* Toast Info */}
                   {integration.provider === 'toast' && !integration.connected && (
-                    <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded text-sm text-orange-800">
+                    <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
                       <strong>Note:</strong> Toast uses API key authentication
                     </div>
                   )}

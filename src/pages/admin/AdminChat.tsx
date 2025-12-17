@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Loader, MessageSquare } from 'lucide-react';
 import { adminApi, DEFAULT_PHONE_NUMBER } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 interface Message {
   type: 'user' | 'agent';
@@ -10,6 +11,7 @@ interface Message {
 }
 
 const AdminChat = () => {
+  const dbName = useDbName();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,13 +27,20 @@ const AdminChat = () => {
   }, [messages]);
 
   useEffect(() => {
-    loadConversationHistory();
-  }, []);
+    if (dbName) {
+      loadConversationHistory();
+    }
+  }, [dbName]);
 
   const loadConversationHistory = async () => {
+    if (!dbName) {
+      setIsLoadingHistory(false);
+      return;
+    }
+
     try {
       setIsLoadingHistory(true);
-      const response = await adminApi.getConversationHistory();
+      const response = await adminApi.getConversationHistory(DEFAULT_PHONE_NUMBER, dbName);
       
       if (response.success && response.history) {
         // Group messages by request_id and convert to chat format
@@ -76,6 +85,17 @@ const AdminChat = () => {
     
     if (!inputMessage.trim() || isLoading) return;
 
+    if (!dbName) {
+      const errorMessage: Message = {
+        type: 'agent',
+        content: 'Database name not available. Please log in again.',
+        timestamp: new Date().toISOString(),
+        isError: true,
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
     const userMessage: Message = {
       type: 'user',
       content: inputMessage,
@@ -87,7 +107,7 @@ const AdminChat = () => {
     setIsLoading(true);
 
     try {
-      const response = await adminApi.sendMessage(inputMessage);
+      const response = await adminApi.sendMessage(inputMessage, DEFAULT_PHONE_NUMBER, dbName);
       
       if (response.success) {
         const agentMessage: Message = {

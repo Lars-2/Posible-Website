@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Loader, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { adminApi, DEFAULT_PHONE_NUMBER } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 const DAYS_OF_WEEK = [
   { value: 'mon', label: 'Monday' },
@@ -21,6 +22,7 @@ interface Schedule {
 }
 
 const AdminSchedules = () => {
+  const dbName = useDbName();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,14 +37,22 @@ const AdminSchedules = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    loadSchedules();
-  }, []);
+    if (dbName) {
+      loadSchedules();
+    }
+  }, [dbName]);
 
   const loadSchedules = async () => {
+    if (!dbName) {
+      setError('Database name not available');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError('');
-      const response = await adminApi.getSchedules();
+      const response = await adminApi.getSchedules(DEFAULT_PHONE_NUMBER, dbName);
       
       if (response.success) {
         setSchedules(response.schedules);
@@ -99,15 +109,20 @@ const AdminSchedules = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       setError('');
       
       let response;
       if (editingSchedule) {
-        response = await adminApi.editSchedule(editingSchedule.id, formData);
+        response = await adminApi.editSchedule(editingSchedule.id, formData, dbName);
       } else {
-        response = await adminApi.createSchedule(formData);
+        response = await adminApi.createSchedule(formData, dbName);
       }
       
       if (response.success) {
@@ -129,9 +144,14 @@ const AdminSchedules = () => {
       return;
     }
 
+    if (!dbName) {
+      setError('Database name not available');
+      return;
+    }
+
     try {
       setError('');
-      const response = await adminApi.deleteSchedule(scheduleId, DEFAULT_PHONE_NUMBER);
+      const response = await adminApi.deleteSchedule(scheduleId, DEFAULT_PHONE_NUMBER, dbName);
       
       if (response.success) {
         loadSchedules();

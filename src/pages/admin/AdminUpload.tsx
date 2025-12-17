@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Upload as UploadIcon, File, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { adminApi } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 const AdminUpload = () => {
+  const dbName = useDbName();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [primaryKey, setPrimaryKey] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -64,11 +66,19 @@ const AdminUpload = () => {
       return;
     }
 
+    if (!dbName) {
+      setUploadStatus({
+        type: 'error',
+        message: 'Database name not available. Please log in again.'
+      });
+      return;
+    }
+
     try {
       setIsUploading(true);
       setUploadStatus(null);
       
-      const response = await adminApi.uploadCSV(selectedFile, primaryKey || null);
+      const response = await adminApi.uploadCSV(selectedFile, primaryKey || null, dbName);
       
       if (response.success !== false) {
         setUploadStatus({

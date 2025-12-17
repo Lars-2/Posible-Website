@@ -17,10 +17,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+// In development, use relative URLs to leverage Vite proxy
+// In production, use the environment variable or default to same origin
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.DEV ? '' : 'https://posible.pythonanywhere.com');
 
-// Configure axios to send credentials
-axios.defaults.withCredentials = true;
+// Create a dedicated axios instance for auth API calls with credentials enabled
+const authClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true, // This ensures cookies are sent and received with every request
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -32,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkSession = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/auth/session`);
+      const response = await authClient.get('/api/auth/session');
       if (response.data.success && response.data.authenticated) {
         setUser(response.data.user);
       } else {
@@ -48,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+      const response = await authClient.post('/api/auth/login', {
         email,
         password,
       });
@@ -70,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/auth/logout`);
+      await authClient.post('/api/auth/logout');
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);

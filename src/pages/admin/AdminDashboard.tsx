@@ -8,9 +8,11 @@ import {
   Loader,
   ArrowRight
 } from 'lucide-react';
-import { adminApi } from '../../services/adminApi';
+import { adminApi, DEFAULT_PHONE_NUMBER } from '../../services/adminApi';
+import { useDbName } from '../../hooks/useDbName';
 
 const AdminDashboard = () => {
+  const dbName = useDbName();
   const [stats, setStats] = useState({
     users: 0,
     schedules: 0,
@@ -18,17 +20,24 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (dbName) {
+      loadDashboardData();
+    }
+  }, [dbName]);
 
   const loadDashboardData = async () => {
+    if (!dbName) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       
       // Load users and schedules in parallel
       const [usersResponse, schedulesResponse] = await Promise.all([
-        adminApi.getUsers().catch(() => ({ success: false, users: [] })),
-        adminApi.getSchedules().catch(() => ({ success: false, schedules: [] })),
+        adminApi.getUsers(dbName).catch(() => ({ success: false, users: [] })),
+        adminApi.getSchedules(DEFAULT_PHONE_NUMBER, dbName).catch(() => ({ success: false, schedules: [] })),
       ]);
 
       setStats({
@@ -68,7 +77,7 @@ const AdminDashboard = () => {
       title: 'POS Integrations',
       description: 'Connect your Point of Sale systems',
       icon: TrendingUp,
-      color: 'bg-orange-500',
+      color: 'bg-gray-500',
       link: '/admin/integrations',
     },
   ];
