@@ -19,7 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 // Use environment variable or default to production backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://posible.pythonanywhere.com';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.posibleai.com';
 
 // Create a dedicated axios instance for auth API calls with credentials enabled
 const authClient = axios.create({
