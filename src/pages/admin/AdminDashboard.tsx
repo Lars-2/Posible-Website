@@ -81,6 +81,7 @@ const AdminDashboard = () => {
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
+      link: '/admin/users',
     },
     {
       title: 'Active Schedules',
@@ -88,6 +89,7 @@ const AdminDashboard = () => {
       icon: Calendar,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
+      link: '/admin/schedules',
     },
   ];
 
@@ -110,7 +112,11 @@ const AdminDashboard = () => {
             {statCards.map((stat) => {
               const Icon = stat.icon;
               return (
-                <div key={stat.title} className="bg-white rounded-lg shadow-md p-6">
+                <Link 
+                  key={stat.title} 
+                  to={stat.link}
+                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg hover:scale-105 transition-all cursor-pointer"
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
@@ -120,7 +126,7 @@ const AdminDashboard = () => {
                       <Icon className={stat.color} size={24} />
                     </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

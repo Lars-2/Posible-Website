@@ -28,7 +28,6 @@ const AdminIntegrations = () => {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [showToastModal, setShowToastModal] = useState(false);
   const [toastApiKey, setToastApiKey] = useState('');
-  const [toastRestaurantGuid, setToastRestaurantGuid] = useState('');
   const [isSavingToast, setIsSavingToast] = useState(false);
 
   useEffect(() => {
@@ -129,12 +128,11 @@ const AdminIntegrations = () => {
       setIsSavingToast(true);
       setError('');
       
-      const response = await adminApi.saveToastApiKey(toastApiKey, toastRestaurantGuid || null, dbName);
+      const response = await adminApi.saveToastApiKey(toastApiKey, null, dbName);
       
       if (response.success) {
         setShowToastModal(false);
         setToastApiKey('');
-        setToastRestaurantGuid('');
         loadIntegrations();
       } else {
         setError(response.error || 'Failed to save Toast API key');
@@ -309,13 +307,6 @@ const AdminIntegrations = () => {
                       </button>
                     )}
                   </div>
-
-                  {/* Toast Info */}
-                  {integration.provider === 'toast' && !integration.connected && (
-                    <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                      <strong>Note:</strong> Toast uses API key authentication
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -394,9 +385,13 @@ const AdminIntegrations = () => {
               <h2 className="text-2xl font-bold text-gray-900">Connect Toast POS</h2>
             </div>
             
-            <p className="text-gray-600 mb-4 text-sm">
+            <p className="text-gray-600 mb-3 text-sm">
               Enter your Toast API credentials to connect your restaurant POS system.
             </p>
+
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+              <strong>Note:</strong> Toast uses API key authentication instead of OAuth.
+            </div>
 
             <form onSubmit={handleSaveToastApiKey}>
               <div className="space-y-4">
@@ -417,22 +412,6 @@ const AdminIntegrations = () => {
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Restaurant GUID <span className="text-gray-400">(Optional)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={toastRestaurantGuid}
-                    onChange={(e) => setToastRestaurantGuid(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                    placeholder="e.g., 12a34b56-78cd-90ef-gh12-ijk345lmn678"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Your unique restaurant identifier
-                  </p>
-                </div>
-
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                     {error}
@@ -446,7 +425,6 @@ const AdminIntegrations = () => {
                   onClick={() => {
                     setShowToastModal(false);
                     setToastApiKey('');
-                    setToastRestaurantGuid('');
                     setError('');
                   }}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
